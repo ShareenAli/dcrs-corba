@@ -1,0 +1,14 @@
+module CourseRegistrationSystem {
+    interface Course {
+        boolean validateAdvisor(in string clientId);
+        boolean validateStudent(in string clientId);
+        boolean addCourse(in String id, in string courseId, in string courseName, in string term, in short seatsAvailable);
+        boolean showCourses();
+        boolean deleteCourse(in string id, in string courseId, in string term, in string department);
+        string enrollCourse(in string id, string term, in string department, in boolean udpCall);
+        string displayCourses(in string term);
+        boolean dropCourse(in string studentId, in string courseId, in string term, in string department, in boolean udpCall);
+        string getClassSchedule(in string studentId);
+        string listCourseAvailability(in string id, in string term, in string department, in boolean updCall);
+    }
+}
