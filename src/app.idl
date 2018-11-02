@@ -3,7 +3,7 @@ module CourseRegistrationSystem {
         boolean validateAdvisor(in string clientId);
         boolean validateStudent(in string clientId);
         boolean addCourse(in string id, in string courseId, in string courseName, in string term, in short seatsAvailable);
-        boolean showCourses();
+        void showCourses();
         boolean deleteCourse(in string id, in string courseId, in string term, in string department);
         string enrollCourse(in string id, in string term, in string department, in boolean udpCall);
         string displayCourses(in string term);

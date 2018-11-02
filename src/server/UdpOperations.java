@@ -13,15 +13,15 @@ public class UdpOperations implements Serializable, Runnable {
     private int operation;
     private DatagramPacket packet;
     private DatagramSocket socket;
-    private ServerOperations serverOperations;
+    private CourseOperations courseOperations;
     private Thread thread;
     private HashMap<String, Integer> courses = new HashMap<>();
 
 
-    public UdpOperations(DatagramSocket socket, DatagramPacket packet, ServerOperations serverOperations) {
+    public UdpOperations(DatagramSocket socket, DatagramPacket packet, CourseOperations courseOperations) {
         this.socket = socket;
         this.packet = packet;
-        this.serverOperations = serverOperations;
+        this.courseOperations = courseOperations;
     }
 
     public void run() {
@@ -37,22 +37,22 @@ public class UdpOperations implements Serializable, Runnable {
             System.out.println("Operation : " + udpPacket.getOperation());
             switch (udpPacket.getOperation()) {
                 case 1:
-                    message = serverOperations.udpEnrollCourse(udpBody.getStudentID(), udpBody.getTerm(), udpBody.getDepartment(), udpBody.getCourseID());
+                    message = courseOperations.udpEnrollCourse(udpBody.getStudentID(), udpBody.getTerm(), udpBody.getDepartment(), udpBody.getCourseID());
                     System.out.println("Response from udpenroll" + message);
                     outgoingMessage = serialize(message);
                     break;
                 case 2:
-                    dropmessage = serverOperations.udpDropCourse(udpBody.getStudentID(), udpBody.getCourseID(), udpBody.getTerm(), udpBody.getDepartment());
+                    dropmessage = courseOperations.udpDropCourse(udpBody.getStudentID(), udpBody.getCourseID(), udpBody.getTerm(), udpBody.getDepartment());
                     System.out.println("Response from udpDropcourse" + dropmessage);
                     outgoingMessage = serialize(dropmessage);
                     break;
                 case 3:
-                    courses = serverOperations.udpListCourseAvailability(udpBody.getStudentID(), udpBody.getTerm(), udpBody.getDepartment());
+                    courses = courseOperations.udpListCourseAvailability(udpBody.getStudentID(), udpBody.getTerm(), udpBody.getDepartment());
                     System.out.println("Response from udp list course " + courses);
                     outgoingMessage = serialize(courses);
                     break;
                 case 4:
-                    message = serverOperations.deleteCourseStudentList(udpBody.getCourseID());
+                    message = courseOperations.deleteCourseStudentList(udpBody.getCourseID());
                     outgoingMessage = serialize(message);
                     break;
                 default:
