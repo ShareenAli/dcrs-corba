@@ -80,9 +80,8 @@ public class CompServer {
             return;
         }
 
-        DatagramSocket socket = null;
         try {
-            socket = new DatagramSocket(8001);
+            DatagramSocket socket = new DatagramSocket(8001);
 
             byte[] buffer = new byte[1000];
 

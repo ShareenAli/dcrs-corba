@@ -23,7 +23,8 @@ public class StudentOperations {
             System.out.println("\n Choose the operation you wish to perform :- \n "
                     + "1. Enroll Course \n"
                     + "2. Drop Course \n "
-                    + "3. View Class Schedule \n");
+                    + "3. View Class Schedule \n"
+                    + "4. Swap Course \n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 3) {
                 getClassSchedule(id, serverinterface);
@@ -40,6 +41,8 @@ public class StudentOperations {
                         enrollCourse(id, term, deptName, serverinterface);
                     } else if (operationChoice == 2) {
                         dropCourse(id, term, deptName, serverinterface);
+                    } else if (operationChoice ==3) {
+
                     }
                 } else {
                     System.out.println("Please enter valid term name. Try Again!");

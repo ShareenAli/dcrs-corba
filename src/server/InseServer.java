@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 public class InseServer {
 
-    public static void main(String[] args) throws RemoteException, AlreadyBoundException {
+    public static void main(String[] args) {
         Logger logs = Logger.getLogger("Inse Server");
 
         try {
@@ -84,9 +84,8 @@ public class InseServer {
             return;
         }
 
-        DatagramSocket socket = null;
         try {
-            socket = new DatagramSocket(8003);
+            DatagramSocket socket = new DatagramSocket(8003);
 
             byte[] buffer = new byte[1000];
 
