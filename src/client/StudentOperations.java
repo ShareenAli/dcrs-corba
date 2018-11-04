@@ -17,10 +17,10 @@ class StudentOperations {
             Scanner sc = new Scanner(System.in);
             String term;
             System.out.println("\n Choose the operation you wish to perform :- \n "
-                    + "1. Enroll CourseData \n"
-                    + "2. Drop CourseData \n "
+                    + "1. Enroll Course \n"
+                    + "2. Drop Course \n "
                     + "3. View Class Schedule \n"
-                    + "4. Swap CourseData \n");
+                    + "4. Swap Course \n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 3) {
                 getClassSchedule(id, courseStub);
@@ -62,7 +62,7 @@ class StudentOperations {
                     "\n Total Capacity : " + courseDetails.getCourse_capacity() +
                     "\n Seats Available : " + courseDetails.getSeats_available());
         } */
-        System.out.println("\nPlease enter CourseData ID of the course you wish to enroll for : ");
+        System.out.println("\nPlease enter Course ID of the course you wish to enroll for : ");
         course_id = sc.nextLine().toUpperCase();
 
         if(!(course_id.substring(0,4).equalsIgnoreCase(studentID.substring(0, 4)))){
@@ -70,7 +70,7 @@ class StudentOperations {
         }
 
 
-        String enrollResult = courseStub.enrollCourse(studentID, term, department, udpCall);
+        String enrollResult = courseStub.enrollCourse(studentID, term, department, course_id, udpCall);
         if (enrollResult.equalsIgnoreCase("limit")) {
             System.out.println("You cannot enroll more than 3 courses per term.");
         } else if (enrollResult.equalsIgnoreCase("enrolledAlready")) {
@@ -98,7 +98,7 @@ class StudentOperations {
         if (!classScheduleMap.isEmpty()){
             System.out.println(classScheduleMap);
 
-            System.out.println("CourseData ID of the course you wish to drop : ");
+            System.out.println("Course ID of the course you wish to drop : ");
             course_id = sc.nextLine().toUpperCase();
 
             if(!(course_id.substring(0,4).equalsIgnoreCase(studentID.substring(0, 4))))
