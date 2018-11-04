@@ -3,7 +3,7 @@ package schema;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Course implements Serializable {
+public class CourseData implements Serializable {
 
     private String course_id;
     private String course_name;
@@ -12,7 +12,7 @@ public class Course implements Serializable {
     private int seats_available;
     private ArrayList<String> enrolledStudents = new ArrayList<>();
 
-    public Course(String course_id, String course_name, String term, int course_capacity) {
+    public CourseData(String course_id, String course_name, String term, int course_capacity) {
         this.course_id = course_id;
         this.course_name = course_name;
         this.term = term;

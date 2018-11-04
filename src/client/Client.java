@@ -1,23 +1,27 @@
 package client;
 
-import server.ServerInterface;
+import CourseRegistrationSystem.Course;
+import CourseRegistrationSystem.CourseHelper;
+import org.omg.CORBA.ORB;
+import org.omg.CORBA.ORBPackage.InvalidName;
+import org.omg.CORBA.Object;
+import org.omg.CosNaming.NamingContextExt;
+import org.omg.CosNaming.NamingContextExtHelper;
+import org.omg.CosNaming.NamingContextPackage.CannotProceed;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 
 import java.io.IOException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 public class Client {
 
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) {
         Logger logs = Logger.getLogger("Client");
         String clientID, deptName = "";
         Boolean advisor_id_letter = false, student_id_letter = false, loop = true;
-        ServerInterface clientStub = null;
+        Course clientStub = null;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter your unique ID : ");
         clientID = sc.nextLine().toUpperCase();
@@ -53,27 +57,44 @@ public class Client {
 
         if (advisor_id_letter || student_id_letter) {
             try {
+                // create and instantiate orb
+                ORB orb = ORB.init(args, null);
+
+                // get the root naming context
+                Object objectReference = orb.resolve_initial_references("NameService");
+                NamingContextExt ref = NamingContextExtHelper.narrow(objectReference);
+
+
                 if (deptName.equalsIgnoreCase("COMP")) {
-                    Registry registry = LocateRegistry.getRegistry(4004);
-                    clientStub = (ServerInterface) registry.lookup(deptName);
+                    clientStub = CourseHelper.narrow(ref.resolve_str("COMP"));
                     System.out.println("Connected to COMP Server!");
                 } else if (deptName.equalsIgnoreCase("SOEN")) {
-                    Registry registry = LocateRegistry.getRegistry(4005);
-                    clientStub = (ServerInterface) registry.lookup(deptName);
+                    clientStub = CourseHelper.narrow(ref.resolve_str("SOEN"));
                     System.out.println("Connected to SOEN Server!");
                 } else if (deptName.equalsIgnoreCase("INSE")) {
-                    Registry registry = LocateRegistry.getRegistry(4006);
-                    clientStub = (ServerInterface) registry.lookup(deptName);
+                    clientStub = CourseHelper.narrow(ref.resolve_str("INSE"));
                     System.out.println("Connected to INSE Server!");
                 } else {
                     System.out.println("Department name NOT FOUND!");
                 }
                 logs.info("Connected to " + deptName + " server");
-            } catch (NotBoundException e) {
-                System.out.println("Invalid Client ID. Sorry!");
-                e.printStackTrace();
+            } catch (InvalidName invalidName) {
+                logs.severe("Invalid reference to Name Service. \nMessage: " + invalidName.getMessage());
+                return;
+            } catch (CannotProceed cannotProceed) {
+                logs.severe("CannotProceed exception thrown. \nMessage: " + cannotProceed.getMessage());
+                return;
+            } catch (org.omg.CosNaming.NamingContextPackage.InvalidName invalidName) {
+                logs.severe("Invalid reference to the server. Please check the name. \n Message:" + invalidName.getMessage());
+                return;
+            } catch (NotFound notFound) {
+                logs.severe("Server not found.\nMessage: " + notFound.getMessage());
+                return;
             }
         }
+
+        if (clientStub == null)
+            return;
 
         if (advisor_id_letter) {
             boolean validAdvisor = false;
@@ -93,7 +114,7 @@ public class Client {
                     break;
                 }
             }
-        } else if (student_id_letter) {
+        } else {
             boolean validStudent = false;
             try {
                 validStudent = clientStub.validateStudent(clientID);

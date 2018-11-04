@@ -228,7 +228,7 @@ public class _CourseStub extends org.omg.CORBA.portable.ObjectImpl implements Co
 
   // Type-specific CORBA::Object operations
   private static String[] __ids = {
-    "IDL:CourseRegistrationSystem/Course:1.0"};
+    "IDL:CourseRegistrationSystem/CourseData:1.0"};
 
   public String[] _ids ()
   {

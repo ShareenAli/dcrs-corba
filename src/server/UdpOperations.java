@@ -42,12 +42,12 @@ public class UdpOperations implements Serializable, Runnable {
                     outgoingMessage = serialize(message);
                     break;
                 case 2:
-                    dropmessage = courseOperations.udpDropCourse(udpBody.getStudentID(), udpBody.getCourseID(), udpBody.getTerm(), udpBody.getDepartment());
+                    dropmessage = courseOperations.udpDropCourse(udpBody.getStudentID(), udpBody.getCourseID(), udpBody.getTerm());
                     System.out.println("Response from udpDropcourse" + dropmessage);
                     outgoingMessage = serialize(dropmessage);
                     break;
                 case 3:
-                    courses = courseOperations.udpListCourseAvailability(udpBody.getStudentID(), udpBody.getTerm(), udpBody.getDepartment());
+                    courses = courseOperations.udpListCourseAvailability(udpBody.getTerm());
                     System.out.println("Response from udp list course " + courses);
                     outgoingMessage = serialize(courses);
                     break;

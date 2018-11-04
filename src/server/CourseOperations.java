@@ -1,7 +1,7 @@
 package server;
 
 import CourseRegistrationSystem.CoursePOA;
-import schema.Course;
+import schema.CourseData;
 import schema.UdpBody;
 import schema.UdpPacket;
 
@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +18,13 @@ import java.util.logging.Logger;
 public class CourseOperations extends CoursePOA {
     private Logger logs;
 
-    private HashMap<String, HashMap<String, Course>> courseDetails = new HashMap<>();
+    private HashMap<String, HashMap<String, CourseData>> courseDetails = new HashMap<>();
     private HashMap<String, HashMap<String, List<String>>> studentTermWiseDetails = new HashMap<>();
     private HashMap<String, Integer> listCourse = new HashMap<>();
-    private String advisorID = "";
-    int CompPort = 8001, SoenPort = 8002, InsePort = 8003;
+    private String advisorID;
+    private int CompPort = 8001, SoenPort = 8002, InsePort = 8003;
 
-    public CourseOperations(String deptName, Logger logs) {
+    CourseOperations(String deptName, Logger logs) {
         this.logs = logs;
         advisorID = deptName.toUpperCase() + "A1001";
         for (int i = 1; i < 6; i++) {
@@ -54,22 +53,22 @@ public class CourseOperations extends CoursePOA {
     @Override
     public boolean addCourse(String id, String courseId, String courseName, String term, short seatsAvailable) {
         if (courseDetails.containsKey(term)) {
-            HashMap<String, Course> termMap = courseDetails.get(term);
+            HashMap<String, CourseData> termMap = courseDetails.get(term);
             if (termMap.containsKey(courseId)) {
                 System.out.println("This course ID already exists for this term. Please try again!");
                 return false;
             } else {
-                Course newCourse = new Course(courseId, courseName, term, seatsAvailable);
-                termMap.put(courseId, newCourse);
+                CourseData newCourseData = new CourseData(courseId, courseName, term, seatsAvailable);
+                termMap.put(courseId, newCourseData);
                 courseDetails.put(term, termMap);
                 showCourses();
                 return true;
             }
         } else {
-            HashMap<String, Course> courseMap = new HashMap<>();
-            Course course = new Course(courseId, courseName, term, seatsAvailable);
-            courseMap.put(course.getCourse_id(), course);
-            courseDetails.put(course.getTerm(), courseMap);
+            HashMap<String, CourseData> courseMap = new HashMap<>();
+            CourseData courseData = new CourseData(courseId, courseName, term, seatsAvailable);
+            courseMap.put(courseData.getCourse_id(), courseData);
+            courseDetails.put(courseData.getTerm(), courseMap);
             showCourses();
             return true;
         }
@@ -78,16 +77,16 @@ public class CourseOperations extends CoursePOA {
     @Override
     public void showCourses() {
         System.out.println("\n New Operation : \n");
-        for (Map.Entry<String, HashMap<String, Course>> term : this.courseDetails.entrySet()) {
+        for (Map.Entry<String, HashMap<String, CourseData>> term : this.courseDetails.entrySet()) {
             String termName = term.getKey();
-            for (Map.Entry<String, Course> course : term.getValue().entrySet()) {
+            for (Map.Entry<String, CourseData> course : term.getValue().entrySet()) {
                 String courseId = course.getKey();
-                Course courseDetails = course.getValue();
-                System.out.println("Term : " + termName + "\n Course ID: " + courseId +
-                        "\n Course Name : " + courseDetails.getCourse_name() +
-                        "\n Total Capacity : " + courseDetails.getCourse_capacity() +
-                        "\n Seats Available : " + courseDetails.getSeats_available() +
-                        "\n Course Added Successfully!");
+                CourseData courseDataDetails = course.getValue();
+                System.out.println("Term : " + termName + "\n CourseData ID: " + courseId +
+                        "\n CourseData Name : " + courseDataDetails.getCourse_name() +
+                        "\n Total Capacity : " + courseDataDetails.getCourse_capacity() +
+                        "\n Seats Available : " + courseDataDetails.getSeats_available() +
+                        "\n CourseData Added Successfully!");
             }
         }
     }
@@ -96,7 +95,7 @@ public class CourseOperations extends CoursePOA {
     public boolean deleteCourse(String id, String courseId, String term, String department) {
         int[] ports = new int[2];
         if (courseDetails.containsKey(term)) {
-            HashMap<String, Course> termMap = this.courseDetails.get(term);
+            HashMap<String, CourseData> termMap = this.courseDetails.get(term);
             if (termMap.containsKey(courseId)) {
                 termMap.remove(courseId);
                 courseDetails.put(term, termMap);
@@ -133,7 +132,7 @@ public class CourseOperations extends CoursePOA {
 
                 return true;
             } else {
-                System.out.println("There is no course with " + courseId + " Course ID.");
+                System.out.println("There is no course with " + courseId + " CourseData ID.");
                 return false;
             }
         } else {
@@ -144,15 +143,15 @@ public class CourseOperations extends CoursePOA {
 
     @Override
     public String enrollCourse(String id, String term, String department, boolean udpCall) {
-        HashMap<String, Course> termMap = courseDetails.get(term);
+        HashMap<String, CourseData> termMap = courseDetails.get(term);
         HashMap<String, List<String>> studentCourseDetails = studentTermWiseDetails.get(id);
-        int port = 0, enrollLimit = 0;
+        int port, enrollLimit = 0;
 
         if (udpCall) {
             System.out.println("UDP details : " + "\n" + id + "\n" + term + "\n" + department + "\n" + id);
-            List<String> courses = studentCourseDetails.get(term);
 
             if (studentCourseDetails.containsKey(term)) {
+                List<String> courses = studentCourseDetails.get(term);
                 if (courses != null) {
 
                     for(String course : courses){
@@ -189,6 +188,7 @@ public class CourseOperations extends CoursePOA {
             String responseObj = (String) udpPacketInfo(udpPacket, port);
             if (responseObj.equalsIgnoreCase("enrolledSuccessfully")) {
                 if (studentCourseDetails.containsKey(term)) {
+                    List<String> courses = studentCourseDetails.get(term);
                     courses.add(id);
                     studentCourseDetails.put(term, courses);
                     studentTermWiseDetails.put(id, studentCourseDetails);
@@ -205,10 +205,10 @@ public class CourseOperations extends CoursePOA {
             }
         } else {
             if (courseDetails.containsKey(term)) {
-                Course course = termMap.get(id);
-                if (course != null) {
+                CourseData courseData = termMap.get(id);
+                if (courseData != null) {
                     List<String> courses = studentCourseDetails.get(term);
-                    if (course.courseAvailability()) {
+                    if (courseData.courseAvailability()) {
                         return "courseFull";
                     }
                     if (studentCourseDetails.containsKey(term)) {
@@ -219,8 +219,8 @@ public class CourseOperations extends CoursePOA {
                             return "enrolledAlready";
                         }
                     }
-                    course.setEnrolledStudents(id);
-                    termMap.put(id, course);
+                    courseData.setEnrolledStudents(id);
+                    termMap.put(id, courseData);
                     courseDetails.put(term, termMap);
                     if (studentCourseDetails.containsKey(term)) {
                         courses.add(id);
@@ -244,14 +244,18 @@ public class CourseOperations extends CoursePOA {
 
     @Override
     public String displayCourses(String term) {
-        HashMap<String, Course> termCourses = this.courseDetails.get(term);
-        // TODO::implement parsing
-        return "";
+        String message = "";
+        HashMap<String, CourseData> termCourses = this.courseDetails.get(term);
+        for (Map.Entry<String, CourseData> theTerm : termCourses.entrySet()) {
+            String courseID = theTerm.getKey();
+            message = message.concat("\n -> Course ID : " + courseID);
+        }
+        return message;
     }
 
     @Override
     public boolean dropCourse(String studentId, String courseId, String term, String department, boolean udpCall) {
-        int port = 0;
+        int port;
         if (udpCall) {
             if (courseId.length()<8){
                 if (courseId.substring(0, 4).equalsIgnoreCase("COMP")) {
@@ -266,9 +270,9 @@ public class CourseOperations extends CoursePOA {
                 UdpPacket udpPacket = new UdpPacket(2, udpBody);
                 System.out.println("Check in enroll method");
                 System.out.println(udpPacket.getOperation());
-                Boolean responseObj = (Boolean) udpPacketInfo(udpPacket, port);
+                boolean responseObj = (boolean) udpPacketInfo(udpPacket, port);
 
-                if (responseObj.booleanValue()) {
+                if (responseObj) {
                     HashMap<String, List<String>> studentTermCourseDetails = this.studentTermWiseDetails.get(studentId);
                     List<String> course = studentTermCourseDetails.get(term);
                     boolean result = course.remove(courseId);
@@ -286,17 +290,17 @@ public class CourseOperations extends CoursePOA {
                     return false;
                 }
             }else {
-                System.out.println("Course can only be of the pattern COMP####/SOEN####/INSE####.");
+                System.out.println("CourseData can only be of the pattern COMP####/SOEN####/INSE####.");
             }
 
         } else {
             if (courseDetails.containsKey(term)) {
-                HashMap<String, Course> termMap = this.courseDetails.get(term);
+                HashMap<String, CourseData> termMap = this.courseDetails.get(term);
                 if (termMap.containsKey(courseId)) {
-                    Course courseDetails = termMap.get(courseId);
-                    ArrayList<String> studentIDlist = courseDetails.getEnrolledStudents();
+                    CourseData courseDataDetails = termMap.get(courseId);
+                    ArrayList<String> studentIDlist = courseDataDetails.getEnrolledStudents();
                     studentIDlist.remove(studentId);
-                    courseDetails.setEnrolledStudents(studentIDlist);
+                    courseDataDetails.setEnrolledStudents(studentIDlist);
                     HashMap<String, List<String>> studentTermCourseDetails = this.studentTermWiseDetails.get(studentId);
                     List<String> course = studentTermCourseDetails.get(term);
                     boolean result = course.remove(courseId);
@@ -311,7 +315,7 @@ public class CourseOperations extends CoursePOA {
                         return false;
                     }
                 } else {
-                    System.out.println("There is no course with " + courseId + " Course ID.");
+                    System.out.println("There is no course with " + courseId + " CourseData ID.");
 
                 }
             } else {
@@ -323,15 +327,23 @@ public class CourseOperations extends CoursePOA {
 
     @Override
     public String getClassSchedule(String studentId) {
+        String message = "";
         HashMap<String, List<String>> studentTermCourseDetails = this.studentTermWiseDetails.get(studentId);
-        //TODO::implement parsing
-        return "";
+        for (Map.Entry<String, List<String>> studentClassSchedule : studentTermCourseDetails.entrySet()) {
+            List<String> courseList = studentClassSchedule.getValue();
+            message = message.concat("For term : " + studentClassSchedule.getKey() + " :-");
+            for (String course : courseList) {
+                message = message.concat("\n -> CourseData ID : " + course);
+            }
+        }
+        return message;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String listCourseAvailability(String id, String term, String department, boolean udpCall) {
         System.out.println(term);
-        HashMap<String, Course> termMap = courseDetails.get(term);
+        HashMap<String, CourseData> termMap = courseDetails.get(term);
         listCourse.clear();
         int[] ports = new int[2];
 
@@ -367,34 +379,45 @@ public class CourseOperations extends CoursePOA {
         listCourse.putAll(responseObj2);
 
         if (termMap != null) {
-            for (Map.Entry<String, Course> courseEntry : termMap.entrySet()) {
-                Course course = courseEntry.getValue();
-                int space = course.getCourse_capacity() - course.getEnrolledStudents().size();
-                System.out.println("COURSEID: " + course.getCourse_id() + "SPACE: " + space);
-                listCourse.put(course.getCourse_id(), space);
+            for (Map.Entry<String, CourseData> courseEntry : termMap.entrySet()) {
+                CourseData courseData = courseEntry.getValue();
+                int space = courseData.getCourse_capacity() - courseData.getEnrolledStudents().size();
+                System.out.println("COURSEID: " + courseData.getCourse_id() + "SPACE: " + space);
+                listCourse.put(courseData.getCourse_id(), space);
             }
-            System.out.println("MAINLIST: " + listCourse);
-            //TODO::implement parsing
-            return "";
+            return this.listCourseAvailabilityString(listCourse, term);
         }
 
         System.out.println(listCourse.size());
 
-        //TODO::implement parsing
-        return "";
+        return this.listCourseAvailabilityString(listCourse, term);
     }
 
-    public String udpEnrollCourse(String id, String term, String department, String course_id) {
-        HashMap<String, Course> termMap = courseDetails.get(term);
+    private String listCourseAvailabilityString(HashMap<String, Integer> courses, String term) {
+        String message = "";
+        if (courses.size() > 0) {
+            for (Map.Entry<String, Integer> coursesList : courses.entrySet()) {
+                String courseID = coursesList.getKey();
+                Integer courseDetails = coursesList.getValue();
+                message = message.concat("\n -> CourseData ID : " + courseID + "\n Space available: " + courseDetails);
+            }
+        } else
+            message = message.concat("There are no courses for " + term + " term.");
+
+        return message;
+    }
+
+    String udpEnrollCourse(String id, String term, String department, String course_id) {
+        HashMap<String, CourseData> termMap = courseDetails.get(term);
         if (courseDetails.containsKey(term)) {
-            Course course = termMap.get(course_id);
-            if (course != null) {
-                if (course.courseAvailability()) {
+            CourseData courseData = termMap.get(course_id);
+            if (courseData != null) {
+                if (courseData.courseAvailability()) {
                     return "courseFull";
                 }
                 System.out.println("UDP details from udpenroll: " + "\n" + id + "\n" + term + "\n" + department + "\n" + course_id);
-                course.setEnrolledStudents(id);
-                termMap.put(course_id, course);
+                courseData.setEnrolledStudents(id);
+                termMap.put(course_id, courseData);
                 courseDetails.put(term, termMap);
                 return "enrolledSuccessfully";
             } else {
@@ -405,29 +428,28 @@ public class CourseOperations extends CoursePOA {
         }
     }
 
-    public boolean udpDropCourse(String studentID, String courseID, String term, String department) {
+    boolean udpDropCourse(String studentID, String courseID, String term) {
         if (courseDetails.containsKey(term)) {
-            HashMap<String, Course> termMap = this.courseDetails.get(term);
+            HashMap<String, CourseData> termMap = this.courseDetails.get(term);
             if (termMap.containsKey(courseID)) {
-                Course courseDetails = termMap.get(courseID);
-                ArrayList<String> studentIDlist = courseDetails.getEnrolledStudents();
+                CourseData courseDataDetails = termMap.get(courseID);
+                ArrayList<String> studentIDlist = courseDataDetails.getEnrolledStudents();
                 studentIDlist.remove(studentID);
-                courseDetails.setEnrolledStudents(studentIDlist);
+                courseDataDetails.setEnrolledStudents(studentIDlist);
                 return true;
             }
         }
         return false;
     }
 
-    public HashMap<String, Integer> udpListCourseAvailability(String id, String term, String dept) {
-        HashMap<String, Course> termMap = courseDetails.get(term);
-        System.out.println("Check in udplistcourse");
+    HashMap<String, Integer> udpListCourseAvailability(String term) {
+        HashMap<String, CourseData> termMap = courseDetails.get(term);
         if (termMap != null) {
-            for (Map.Entry<String, Course> courseEntry : termMap.entrySet()) {
-                Course course = courseEntry.getValue();
-                int space = course.getCourse_capacity() - course.getEnrolledStudents().size();
-                System.out.println("Course ID: " + course.getCourse_id() + "Course space: " + space);
-                listCourse.put(course.getCourse_id(), space);
+            for (Map.Entry<String, CourseData> courseEntry : termMap.entrySet()) {
+                CourseData courseData = courseEntry.getValue();
+                int space = courseData.getCourse_capacity() - courseData.getEnrolledStudents().size();
+                System.out.println("CourseData ID: " + courseData.getCourse_id() + "CourseData space: " + space);
+                listCourse.put(courseData.getCourse_id(), space);
             }
             return listCourse;
         }
@@ -435,7 +457,6 @@ public class CourseOperations extends CoursePOA {
     }
 
     private Object udpPacketInfo(UdpPacket udpPacket, int port) {
-
         try {
             Object response;
             DatagramSocket socket = new DatagramSocket();
@@ -459,7 +480,7 @@ public class CourseOperations extends CoursePOA {
         return "Error in server";
     }
 
-    protected String deleteCourseStudentList(String courseID){
+    String deleteCourseStudentList(String courseID){
         for (Map.Entry<String, HashMap<String, List<String>>> studentTermCourseDetails : this.studentTermWiseDetails.entrySet()) {
             for (Map.Entry<String, List<String>> termCoursesList : studentTermCourseDetails.getValue().entrySet()) {
                 List<String> coursesList = termCoursesList.getValue();
@@ -469,7 +490,7 @@ public class CourseOperations extends CoursePOA {
         return "Successfully deleted!";
     }
 
-    public void displayStudentDetails() {
+    private void displayStudentDetails() {
         System.out.println("New Operation : ");
         for (Map.Entry<String, HashMap<String, List<String>>> studentTermCourseDetails : this.studentTermWiseDetails.entrySet()) {
             String studentID = studentTermCourseDetails.getKey();
@@ -477,7 +498,11 @@ public class CourseOperations extends CoursePOA {
             for (Map.Entry<String, List<String>> termCoursesList : studentTermCourseDetails.getValue().entrySet()) {
                 List<String> courseList = termCoursesList.getValue();
                 String term = termCoursesList.getKey();
-                System.out.println(studentID + " is enrolled for following courses : " + studentTermWiseDetails.get(studentID));
+                System.out.print(studentID + " is enrolled for ");
+                for (String course : courseList) {
+                    System.out.print(course + " ");
+                }
+                System.out.print(" in " + term + "\n");
             }
         }
     }

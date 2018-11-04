@@ -1,6 +1,6 @@
 package server;
 
-import schema.Course;
+import schema.CourseData;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -15,7 +15,7 @@ public interface ServerInterface extends Remote{
 	public void showCourses() throws RemoteException;
 	public boolean deleteCourse(String id, String course_id, String term, String department) throws RemoteException;
 	public String enrollCourse(String id, String term, String department, String course_id, boolean udpCall)throws RemoteException;
-	public HashMap<String, Course> displayCourses(String term)throws RemoteException;
+	public HashMap<String, CourseData> displayCourses(String term)throws RemoteException;
 	public boolean dropCourse(String studentID, String course_id, String term, String department, boolean udpCall) throws RemoteException;
 	public HashMap<String, List<String>> getClassSchedule(String studentID) throws RemoteException;
 

@@ -10,7 +10,7 @@ package CourseRegistrationSystem;
 
 abstract public class CourseHelper
 {
-  private static String  _id = "IDL:CourseRegistrationSystem/Course:1.0";
+  private static String  _id = "IDL:CourseRegistrationSystem/CourseData:1.0";
 
   public static void insert (org.omg.CORBA.Any a, CourseRegistrationSystem.Course that)
   {
@@ -30,7 +30,7 @@ abstract public class CourseHelper
   {
     if (__typeCode == null)
     {
-      __typeCode = org.omg.CORBA.ORB.init ().create_interface_tc (CourseRegistrationSystem.CourseHelper.id (), "Course");
+      __typeCode = org.omg.CORBA.ORB.init ().create_interface_tc (CourseRegistrationSystem.CourseHelper.id (), "CourseData");
     }
     return __typeCode;
   }

@@ -40,7 +40,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
 
     switch (__method.intValue ())
     {
-       case 0:  // CourseRegistrationSystem/Course/validateAdvisor
+       case 0:  // CourseRegistrationSystem/CourseData/validateAdvisor
        {
          String clientId = in.read_string ();
          boolean $result = false;
@@ -50,7 +50,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 1:  // CourseRegistrationSystem/Course/validateStudent
+       case 1:  // CourseRegistrationSystem/CourseData/validateStudent
        {
          String clientId = in.read_string ();
          boolean $result = false;
@@ -60,7 +60,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 2:  // CourseRegistrationSystem/Course/addCourse
+       case 2:  // CourseRegistrationSystem/CourseData/addCourse
        {
          String id = in.read_string ();
          String courseId = in.read_string ();
@@ -74,14 +74,14 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 3:  // CourseRegistrationSystem/Course/showCourses
+       case 3:  // CourseRegistrationSystem/CourseData/showCourses
        {
          this.showCourses ();
          out = $rh.createReply();
          break;
        }
 
-       case 4:  // CourseRegistrationSystem/Course/deleteCourse
+       case 4:  // CourseRegistrationSystem/CourseData/deleteCourse
        {
          String id = in.read_string ();
          String courseId = in.read_string ();
@@ -94,7 +94,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 5:  // CourseRegistrationSystem/Course/enrollCourse
+       case 5:  // CourseRegistrationSystem/CourseData/enrollCourse
        {
          String id = in.read_string ();
          String term = in.read_string ();
@@ -107,7 +107,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 6:  // CourseRegistrationSystem/Course/displayCourses
+       case 6:  // CourseRegistrationSystem/CourseData/displayCourses
        {
          String term = in.read_string ();
          String $result = null;
@@ -117,7 +117,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 7:  // CourseRegistrationSystem/Course/dropCourse
+       case 7:  // CourseRegistrationSystem/CourseData/dropCourse
        {
          String studentId = in.read_string ();
          String courseId = in.read_string ();
@@ -131,7 +131,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 8:  // CourseRegistrationSystem/Course/getClassSchedule
+       case 8:  // CourseRegistrationSystem/CourseData/getClassSchedule
        {
          String studentId = in.read_string ();
          String $result = null;
@@ -141,7 +141,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
          break;
        }
 
-       case 9:  // CourseRegistrationSystem/Course/listCourseAvailability
+       case 9:  // CourseRegistrationSystem/CourseData/listCourseAvailability
        {
          String id = in.read_string ();
          String term = in.read_string ();
@@ -163,7 +163,7 @@ public abstract class CoursePOA extends org.omg.PortableServer.Servant
 
   // Type-specific CORBA::Object operations
   private static String[] __ids = {
-    "IDL:CourseRegistrationSystem/Course:1.0"};
+    "IDL:CourseRegistrationSystem/CourseData:1.0"};
 
   public String[] _all_interfaces (org.omg.PortableServer.POA poa, byte[] objectId)
   {

@@ -1,33 +1,29 @@
 package client;
 
-import server.ServerInterface;
+import CourseRegistrationSystem.Course;
 
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-public class StudentOperations {
+class StudentOperations {
     private Logger logs;
 
-    public StudentOperations(Logger logs) {
+    StudentOperations(Logger logs) {
         this.logs = logs;
     }
 
-    public void chooseOperation(String id, String deptName, ServerInterface serverinterface) throws RemoteException {
+    void chooseOperation(String id, String deptName, Course courseStub) {
         try {
             Scanner sc = new Scanner(System.in);
-            String course_name, course_id, term;
+            String term;
             System.out.println("\n Choose the operation you wish to perform :- \n "
-                    + "1. Enroll Course \n"
-                    + "2. Drop Course \n "
+                    + "1. Enroll CourseData \n"
+                    + "2. Drop CourseData \n "
                     + "3. View Class Schedule \n"
-                    + "4. Swap Course \n");
+                    + "4. Swap CourseData \n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 3) {
-                getClassSchedule(id, serverinterface);
+                getClassSchedule(id, courseStub);
             } else {
                 System.out.println("Choose the term :- \n" +
                         "-> Fall\n" +
@@ -38,11 +34,9 @@ public class StudentOperations {
                         term.equalsIgnoreCase("Winter") ||
                         term.equalsIgnoreCase("Summer")) {
                     if (operationChoice == 1) {
-                        enrollCourse(id, term, deptName, serverinterface);
+                        enrollCourse(id, term, deptName, courseStub);
                     } else if (operationChoice == 2) {
-                        dropCourse(id, term, deptName, serverinterface);
-                    } else if (operationChoice ==3) {
-
+                        dropCourse(id, term, deptName, courseStub);
                     }
                 } else {
                     System.out.println("Please enter valid term name. Try Again!");
@@ -53,22 +47,22 @@ public class StudentOperations {
         }
     }
 
-    public void enrollCourse(String studentID, String term, String department, ServerInterface serverInterface) throws RemoteException {
+    private void enrollCourse(String studentID, String term, String department, Course courseStub) {
         Scanner sc = new Scanner(System.in);
         String course_id;
         boolean udpCall = false;
-        /* HashMap<String, Course> courses = serverInterface.displayCourses(term);
+        /* HashMap<String, CourseData> courses = serverInterface.displayCourses(term);
         System.out.println("\n Following courses are available for " + term + " term:- \n");
-        for (Map.Entry<String, Course> theTerm : courses.entrySet()) {
+        for (Map.Entry<String, CourseData> theTerm : courses.entrySet()) {
             String courseID = theTerm.getKey();
-            Course courseDetails = theTerm.getValue();
+            CourseData courseDetails = theTerm.getValue();
             int seatsAvailable = courseDetails.getSeats_available();
-            System.out.println("\n -> Course ID : " + courseID +
-                    "\n Course Name : " + courseDetails.getCourse_name() +
+            System.out.println("\n -> CourseData ID : " + courseID +
+                    "\n CourseData Name : " + courseDetails.getCourse_name() +
                     "\n Total Capacity : " + courseDetails.getCourse_capacity() +
                     "\n Seats Available : " + courseDetails.getSeats_available());
         } */
-        System.out.println("\nPlease enter Course ID of the course you wish to enroll for : ");
+        System.out.println("\nPlease enter CourseData ID of the course you wish to enroll for : ");
         course_id = sc.nextLine().toUpperCase();
 
         if(!(course_id.substring(0,4).equalsIgnoreCase(studentID.substring(0, 4)))){
@@ -76,7 +70,7 @@ public class StudentOperations {
         }
 
 
-        String enrollResult = serverInterface.enrollCourse(studentID, term, department, course_id, udpCall);
+        String enrollResult = courseStub.enrollCourse(studentID, term, department, udpCall);
         if (enrollResult.equalsIgnoreCase("limit")) {
             System.out.println("You cannot enroll more than 3 courses per term.");
         } else if (enrollResult.equalsIgnoreCase("enrolledAlready")) {
@@ -95,32 +89,22 @@ public class StudentOperations {
         }
     }
 
-    public void dropCourse(String studentID, String term, String department, ServerInterface serverInterface) throws RemoteException {
+    private void dropCourse(String studentID, String term, String department, Course courseStub) {
         Scanner sc = new Scanner(System.in);
         String course_id;
         boolean udpCall = false;
 
-        serverInterface.getClassSchedule(studentID);
-        HashMap<String, List<String>> ClassScheduleMap = serverInterface.getClassSchedule(studentID);
-        if (!ClassScheduleMap.isEmpty()){
-            System.out.println("SCHEDULE MAP: " + ClassScheduleMap);
-            for (Map.Entry<String, List<String>> studentClassSchedule : ClassScheduleMap.entrySet()) {
-                List<String> courseList = studentClassSchedule.getValue();
+        String classScheduleMap = courseStub.getClassSchedule(studentID);
+        if (!classScheduleMap.isEmpty()){
+            System.out.println(classScheduleMap);
 
-                System.out.println("For term : " + studentClassSchedule.getKey() + " :-");
-                for (String course : courseList) {
-                    System.out.println("\n -> Course ID : " + course);
-                }
-            }
-
-            System.out.println("Course ID of the course you wish to drop : ");
+            System.out.println("CourseData ID of the course you wish to drop : ");
             course_id = sc.nextLine().toUpperCase();
 
-            if(!(course_id.substring(0,4).equalsIgnoreCase(studentID.substring(0, 4)))){
+            if(!(course_id.substring(0,4).equalsIgnoreCase(studentID.substring(0, 4))))
                 udpCall = true;
-            }
 
-            boolean dropCourseResponse = serverInterface.dropCourse(studentID, course_id, term, department, udpCall);
+            boolean dropCourseResponse = courseStub.dropCourse(studentID, course_id, term, department, udpCall);
             if (dropCourseResponse) {
                 System.out.println(studentID + " student has successfully dropped " + course_id + " course for " + term + " term.");
             } else {
@@ -131,18 +115,11 @@ public class StudentOperations {
         }
     }
 
-    public void getClassSchedule(String studentID, ServerInterface serverInterface) throws RemoteException {
-        Scanner sc = new Scanner(System.in);
-        HashMap<String, List<String>> ClassScheduleMap = serverInterface.getClassSchedule(studentID);
-        if (!ClassScheduleMap.isEmpty()){
+    private void getClassSchedule(String studentID, Course courseStub) {
+        String classScheduleMap = courseStub.getClassSchedule(studentID);
+        if (!classScheduleMap.isEmpty()){
             System.out.println("Courses enrolled by " + studentID + " are as follows :-");
-            for (Map.Entry<String, List<String>> studentClassSchedule : ClassScheduleMap.entrySet()) {
-                List<String> courseList = studentClassSchedule.getValue();
-                System.out.println("For term : " + studentClassSchedule.getKey() + " :-");
-                for (String course : courseList) {
-                    System.out.println("\n -> Course ID : " + course);
-                }
-            }
+            System.out.println(classScheduleMap);
         } else{
             System.out.println("No courses enrolled.");
         }
