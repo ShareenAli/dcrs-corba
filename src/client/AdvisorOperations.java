@@ -4,10 +4,7 @@ import CourseRegistrationSystem.Course;
 import server.ServerInterface;
 
 import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.logging.Logger;
 
 class AdvisorOperations {
@@ -24,7 +21,8 @@ class AdvisorOperations {
             System.out.println("\n Choose the operation you wish to perform :- \n "
                     + "1. Add Course \n"
                     + "2. Remove Course \n "
-                    + "3. List Course Availability \n");
+                    + "3. List Course Availability\n"
+                    + "4. Swap course (multiple students)\n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 1) {
                 System.out.println("Choose the term :- \n" +
@@ -67,6 +65,19 @@ class AdvisorOperations {
                     System.out.println("Please enter valid term name. Try Again!");
                 }
 
+            } else if (operationChoice == 4) {
+                System.out.println("Choose the term :- \n" +
+                        "-> Fall\n" +
+                        "-> Winter\n" +
+                        "-> Summer\n");
+                term = sc.nextLine().toLowerCase();
+                if (term.equalsIgnoreCase("Fall") ||
+                        term.equalsIgnoreCase("Winter") ||
+                        term.equalsIgnoreCase("Summer")) {
+                    swapCourseMulti(term, deptName, courseStub);
+                } else {
+                    System.out.println("Please enter valid term name. Try Again!");
+                }
             } else {
                 System.out.println("Invalid operation selection. Sorry!");
             }
@@ -146,4 +157,36 @@ class AdvisorOperations {
         System.out.println(courses);
     }
 
+    private void swapCourseMulti(String term, String department, Course courseStub) {
+        Scanner sc = new Scanner(System.in);
+        int noOfStudents;
+        List<String> studentIds = new ArrayList<>();
+        List<String> oldCourseIds = new ArrayList<>();
+        List<String> newCourseIds = new ArrayList<>();
+
+        System.out.println("How many students to go at once?: ");
+        noOfStudents = Integer.parseInt(sc.nextLine());
+        System.out.println("\nPlease enter Course ID of the course you wish to enroll for : ");
+        String newcourse_id = sc.nextLine().toUpperCase();
+
+        for (int i = 0; i < noOfStudents; i++) {
+            System.out.println("Student Id: ");
+            String studentId = sc.nextLine().toUpperCase();
+
+            System.out.println("Course ID of the course you wish to drop : ");
+            String oldcourse_id = sc.nextLine().toUpperCase();
+
+
+            studentIds.add(studentId);
+            oldCourseIds.add(oldcourse_id);
+            newCourseIds.add(newcourse_id);
+
+            System.out.println(" ");
+        }
+
+        for (int i = 0; i < noOfStudents; i++) {
+            StuOperationThread stuOperationThread = new StuOperationThread(courseStub, term, department, studentIds.get(i), oldCourseIds.get(i), newCourseIds.get(i));
+            stuOperationThread.start();
+        }
+    }
 }

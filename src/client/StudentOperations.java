@@ -23,7 +23,7 @@ class StudentOperations {
                     + "2. Drop Course \n "
                     + "3. View Class Schedule \n"
                     + "4. Swap Course \n"
-                    + "5. Swap Course (multi-thread)\n");
+                    + "5. Swap Course (multiple students)\n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 3) {
                 getClassSchedule(id, courseStub);
