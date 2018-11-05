@@ -150,7 +150,7 @@ public class CourseOperations extends CoursePOA {
     }
 
     @Override
-    public String enrollCourse(String id, String term, String department, String courseId, boolean udpCall) {
+    public String enrollCourse(String id, String term, String department, String courseId, boolean udpCall, boolean swapOperation, boolean checkCrossEnrollLimit) {
         HashMap<String, CourseData> termMap = courseDetails.get(term);
         HashMap<String, List<String>> studentCourseDetails = studentTermWiseDetails.get(id);
         int port, enrollLimit = 0;
@@ -162,18 +162,18 @@ public class CourseOperations extends CoursePOA {
                 List<String> courses = studentCourseDetails.get(term);
                 if (courses != null) {
 
-                    for(String course : courses){
+                    for (String course : courses) {
                         System.out.println("COURSEIDS: " + course);
                         System.out.println("department : " + department);
-                        System.out.println("Student ID : " + id.substring(0,4));
-                        if(!(course.substring(0,4).equalsIgnoreCase(department))){
+                        System.out.println("Student ID : " + id.substring(0, 4));
+                        if (!(course.substring(0, 4).equalsIgnoreCase(department))) {
                             enrollLimit++;
                         }
                     }
-                    if(enrollLimit==2){
+                    if (enrollLimit == 2 && checkCrossEnrollLimit) {
                         return "deptLimit";
                     }
-                    if (courses.size() == 3) {
+                    if (courses.size() == 3 && !swapOperation) {
                         return "limit";
                     }
                     if (courses.contains(courseId)) {
@@ -220,7 +220,7 @@ public class CourseOperations extends CoursePOA {
                         return "courseFull";
                     }
                     if (studentCourseDetails.containsKey(term)) {
-                        if (courses.size() == 3) {
+                        if (courses.size() == 3 && !swapOperation) {
                             return "limit";
                         }
                         if (courses.contains(courseId)) {
@@ -265,7 +265,8 @@ public class CourseOperations extends CoursePOA {
     public boolean dropCourse(String studentId, String courseId, String term, String department, boolean udpCall) {
         int port;
         if (udpCall) {
-            if (courseId.length()<8){
+            System.out.println("dropCourse = " + courseId);
+            if (courseId.length() <= 8) {
                 if (courseId.substring(0, 4).equalsIgnoreCase("COMP")) {
                     port = CompPort;
                 } else if (courseId.substring(0, 4).equalsIgnoreCase("SOEN")) {
@@ -297,7 +298,7 @@ public class CourseOperations extends CoursePOA {
                 } else {
                     return false;
                 }
-            }else {
+            } else {
                 System.out.println("Course can only be of the pattern COMP####/SOEN####/INSE####.");
             }
 
@@ -402,6 +403,68 @@ public class CourseOperations extends CoursePOA {
         return this.listCourseAvailabilityString(listCourse, term);
     }
 
+    @Override
+    public String swapCourse(String id, String oldCourseId, String newCourseId, String term, String department) {
+        String newCourseIdDept = newCourseId.substring(0, 4);
+        String oldCourseIdDept = oldCourseId.substring(0, 4);
+        String studentIdDept = id.substring(0, 4);
+        boolean udpCall = false, crossEnrollLimitCheck = false;
+        String result;
+
+        if (!(newCourseIdDept.equalsIgnoreCase(oldCourseIdDept)) || !(studentIdDept.equalsIgnoreCase(newCourseIdDept))) {
+            udpCall = true;
+        }
+
+        if (oldCourseIdDept.equalsIgnoreCase(department) && (!newCourseIdDept.equalsIgnoreCase(department)))
+            crossEnrollLimitCheck = true;
+
+        if (udpCall) {
+            result = enrollCourse(id, term, department, newCourseId, true, true, crossEnrollLimitCheck);
+            System.out.println("RESULT FROM ENROLL(SWAP): " + result);
+
+            if (result.equalsIgnoreCase("enrolledSuccessfully")) {
+                boolean udp = !oldCourseId.toUpperCase().startsWith(department.toUpperCase());
+                boolean dropCourseResult = dropCourse(id, oldCourseId, term, department,udp);
+                if (dropCourseResult)
+                    return "Course Swapped Successfully";
+                else {
+                    boolean dropAgain = dropCourse(id, newCourseId, term, department, true);
+                    System.out.println("REVERT UDP CALL CHANGES: " + dropAgain);
+                    return "Drop unsucessfull, Changes Reverted!";
+                }
+            } else if (result.equalsIgnoreCase("deptLimit"))
+                return "You cannot Enroll for more than 2 courses from other department!";
+            else if (result.equalsIgnoreCase("enrolledAlready"))
+                return "You have already enrolled for the course!";
+            else if (result.equalsIgnoreCase("courseFull"))
+                return "The course is already Full!";
+            else if (result.equalsIgnoreCase("courseNotFound"))
+                return "Course not found for this term";
+        } else {
+            result = enrollCourse(id, term, department, newCourseId, false, true, crossEnrollLimitCheck);
+            if (result.equalsIgnoreCase("enrolledSuccessfully")) {
+                System.out.println("udp = " + oldCourseId.toUpperCase().startsWith(department.toUpperCase()));
+                boolean udp = !oldCourseId.toUpperCase().startsWith(department.toUpperCase());
+                boolean dropResult = dropCourse(id, oldCourseId, term, department, udp);
+                if (dropResult)
+                    return "Course Swapped Sucessfully!";
+                else {
+                    boolean dropAgain = dropCourse(id, newCourseId, term, department, false);
+                    System.out.println("REVERT CHANGES: " + dropAgain);
+                    return "Reverted changes, dropped the new enrolled course";
+                }
+            } else if (result.equalsIgnoreCase("deptLimit"))
+                return "You cannot Enroll for more than 2 courses from other department!";
+            else if (result.equalsIgnoreCase("enrolledAlready"))
+                return "You have already enrolled for the course!";
+            else if (result.equalsIgnoreCase("courseFull"))
+                return "The course is already Full!";
+            else if (result.equalsIgnoreCase("courseNotFound"))
+                return "Course not found for this term";
+        }
+        return "Server Error";
+    }
+
     private String listCourseAvailabilityString(HashMap<String, Integer> courses, String term) {
         String message = "";
         if (courses.size() > 0) {
@@ -412,7 +475,6 @@ public class CourseOperations extends CoursePOA {
             }
         } else
             message = message.concat("There are no courses for " + term + " term.");
-
         return message;
     }
 
@@ -490,7 +552,7 @@ public class CourseOperations extends CoursePOA {
         return "Error in server";
     }
 
-    String deleteCourseStudentList(String courseID){
+    String deleteCourseStudentList(String courseID) {
         for (Map.Entry<String, HashMap<String, List<String>>> studentTermCourseDetails : this.studentTermWiseDetails.entrySet()) {
             String studentId = studentTermCourseDetails.getKey();
             HashMap<String, List<String>> courseDetails = studentTermCourseDetails.getValue();

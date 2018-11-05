@@ -37,6 +37,8 @@ class StudentOperations {
                         enrollCourse(id, term, deptName, courseStub);
                     } else if (operationChoice == 2) {
                         dropCourse(id, term, deptName, courseStub);
+                    } else if (operationChoice == 4){
+                        swapCourse(id, term, deptName, courseStub);
                     }
                 } else {
                     System.out.println("Please enter valid term name. Try Again!");
@@ -70,7 +72,7 @@ class StudentOperations {
         }
 
 
-        String enrollResult = courseStub.enrollCourse(studentID, term, department, course_id, udpCall);
+        String enrollResult = courseStub.enrollCourse(studentID, term, department, course_id, udpCall,false, true);
         if (enrollResult.equalsIgnoreCase("limit")) {
             System.out.println("You cannot enroll more than 3 courses per term.");
         } else if (enrollResult.equalsIgnoreCase("enrolledAlready")) {
@@ -123,5 +125,21 @@ class StudentOperations {
         } else{
             System.out.println("No courses enrolled.");
         }
+    }
+
+    private void swapCourse(String studentID, String term, String department, Course courseStub){
+        Scanner sc = new Scanner(System.in);
+        String oldcourse_id, newcourse_id;
+        boolean udpCall = false;
+
+        System.out.println("Course ID of the course you wish to drop : ");
+        oldcourse_id = sc.nextLine().toUpperCase();
+
+        System.out.println("\nPlease enter Course ID of the course you wish to enroll for : ");
+        newcourse_id = sc.nextLine().toUpperCase();
+
+        String response = courseStub.swapCourse(studentID, oldcourse_id, newcourse_id, term, department);
+        System.out.println(response);
+
     }
 }

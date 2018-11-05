@@ -5,10 +5,11 @@ module CourseRegistrationSystem {
         boolean addCourse(in string id, in string courseId, in string courseName, in string term, in short seatsAvailable);
         void showCourses();
         boolean deleteCourse(in string id, in string courseId, in string term, in string department);
-        string enrollCourse(in string id, in string term, in string department, in string courseId, in boolean udpCall);
+        string enrollCourse(in string id, in string term, in string department, in string courseId, in boolean udpCall, in boolean swapOperation, in boolean checkCrossEnrollLimit);
         string displayCourses(in string term);
         boolean dropCourse(in string studentId, in string courseId, in string term, in string department, in boolean udpCall);
         string getClassSchedule(in string studentId);
         string listCourseAvailability(in string id, in string term, in string department, in boolean udpCall);
+        string swapCourse(in string id, in string oldCourseId, in string newCourseId, in string term, in string department);
     };
 };
