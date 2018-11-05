@@ -2,6 +2,8 @@ package client;
 
 import CourseRegistrationSystem.Course;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
@@ -20,7 +22,8 @@ class StudentOperations {
                     + "1. Enroll Course \n"
                     + "2. Drop Course \n "
                     + "3. View Class Schedule \n"
-                    + "4. Swap Course \n");
+                    + "4. Swap Course \n"
+                    + "5. Swap Course (multi-thread)\n");
             int operationChoice = Integer.parseInt(sc.nextLine());
             if (operationChoice == 3) {
                 getClassSchedule(id, courseStub);
@@ -39,6 +42,8 @@ class StudentOperations {
                         dropCourse(id, term, deptName, courseStub);
                     } else if (operationChoice == 4){
                         swapCourse(id, term, deptName, courseStub);
+                    } else if (operationChoice == 5) {
+                        swapCourseMulti(term, deptName, courseStub);
                     }
                 } else {
                     System.out.println("Please enter valid term name. Try Again!");
@@ -141,5 +146,38 @@ class StudentOperations {
         String response = courseStub.swapCourse(studentID, oldcourse_id, newcourse_id, term, department);
         System.out.println(response);
 
+    }
+
+    private void swapCourseMulti(String term, String department, Course courseStub) {
+        Scanner sc = new Scanner(System.in);
+        int noOfStudents;
+        List<String> studentIds = new ArrayList<>();
+        List<String> oldCourseIds = new ArrayList<>();
+        List<String> newCourseIds = new ArrayList<>();
+
+        System.out.println("How many students to go at once?: ");
+        noOfStudents = Integer.parseInt(sc.nextLine());
+        System.out.println("\nPlease enter Course ID of the course you wish to enroll for : ");
+        String newcourse_id = sc.nextLine().toUpperCase();
+
+        for (int i = 0; i < noOfStudents; i++) {
+            System.out.println("Student Id: ");
+            String studentId = sc.nextLine().toUpperCase();
+
+            System.out.println("Course ID of the course you wish to drop : ");
+            String oldcourse_id = sc.nextLine().toUpperCase();
+
+
+            studentIds.add(studentId);
+            oldCourseIds.add(oldcourse_id);
+            newCourseIds.add(newcourse_id);
+
+            System.out.println(" ");
+        }
+
+        for (int i = 0; i < noOfStudents; i++) {
+            StuOperationThread stuOperationThread = new StuOperationThread(courseStub, term, department, studentIds.get(i), oldCourseIds.get(i), newCourseIds.get(i));
+            stuOperationThread.start();
+        }
     }
 }

@@ -150,7 +150,7 @@ public class CourseOperations extends CoursePOA {
     }
 
     @Override
-    public String enrollCourse(String id, String term, String department, String courseId, boolean udpCall, boolean swapOperation, boolean checkCrossEnrollLimit) {
+    public synchronized String enrollCourse(String id, String term, String department, String courseId, boolean udpCall, boolean swapOperation, boolean checkCrossEnrollLimit) {
         HashMap<String, CourseData> termMap = courseDetails.get(term);
         HashMap<String, List<String>> studentCourseDetails = studentTermWiseDetails.get(id);
         int port, enrollLimit = 0;
@@ -262,7 +262,7 @@ public class CourseOperations extends CoursePOA {
     }
 
     @Override
-    public boolean dropCourse(String studentId, String courseId, String term, String department, boolean udpCall) {
+    public synchronized boolean dropCourse(String studentId, String courseId, String term, String department, boolean udpCall) {
         int port;
         if (udpCall) {
             System.out.println("dropCourse = " + courseId);
@@ -404,7 +404,8 @@ public class CourseOperations extends CoursePOA {
     }
 
     @Override
-    public String swapCourse(String id, String oldCourseId, String newCourseId, String term, String department) {
+    public synchronized String swapCourse(String id, String oldCourseId, String newCourseId, String term, String department) {
+        System.out.println("Swapping course");
         String newCourseIdDept = newCourseId.substring(0, 4);
         String oldCourseIdDept = oldCourseId.substring(0, 4);
         String studentIdDept = id.substring(0, 4);
@@ -478,7 +479,7 @@ public class CourseOperations extends CoursePOA {
         return message;
     }
 
-    String udpEnrollCourse(String id, String term, String department, String course_id) {
+    synchronized String udpEnrollCourse(String id, String term, String department, String course_id) {
         HashMap<String, CourseData> termMap = courseDetails.get(term);
         if (courseDetails.containsKey(term)) {
             CourseData courseData = termMap.get(course_id);
@@ -499,7 +500,7 @@ public class CourseOperations extends CoursePOA {
         }
     }
 
-    boolean udpDropCourse(String studentID, String courseID, String term) {
+    synchronized boolean udpDropCourse(String studentID, String courseID, String term) {
         if (courseDetails.containsKey(term)) {
             HashMap<String, CourseData> termMap = this.courseDetails.get(term);
             if (termMap.containsKey(courseID)) {
