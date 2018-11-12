@@ -100,7 +100,7 @@ class AdvisorOperations {
             course_capacity = sc.nextInt();
             if (course_id.substring(0, 4).equalsIgnoreCase(clientID.substring(0, 4))) {
                 if (course_capacity == (int) course_capacity) {
-                    if (course_capacity > 0 && course_capacity <= 5) {
+                    if (course_capacity >= 0 && course_capacity <= 5) {
                         addCourseResult = courseStub.addCourse(clientID, course_id, course_name, term, (short) course_capacity);
                         if (addCourseResult) {
                             System.out.println("Congratulations, Course added successfully!");
@@ -108,7 +108,7 @@ class AdvisorOperations {
                             System.out.println("This course already exists for this term. Please try again!");
                         }
                     } else {
-                        System.out.println("Course capacity should be minimum 1 and maximum 5. Kindly check!");
+                        System.out.println("Course capacity should be minimum 0 and maximum 5. Kindly check!");
                     }
 
                 } else {
