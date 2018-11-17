@@ -412,7 +412,8 @@ public class CourseOperations extends CoursePOA {
         boolean udpCall = false, crossEnrollLimitCheck = false;
         String result;
 
-        if (!(newCourseIdDept.equalsIgnoreCase(oldCourseIdDept)) || !(studentIdDept.equalsIgnoreCase(newCourseIdDept))) {
+        if (!(newCourseIdDept.equalsIgnoreCase(department)) || !(studentIdDept.equalsIgnoreCase(newCourseIdDept))) {
+            System.out.println("udp is true");
             udpCall = true;
         }
 
